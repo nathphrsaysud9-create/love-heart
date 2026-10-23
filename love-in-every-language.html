@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>I love you — in every language</title>
+<style>
+:root{color-scheme:dark}
+html,body{margin:0;height:100%;background:#000;overflow:hidden}
+canvas{display:block;width:100%;height:100%}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+const P=("I love you|Je t’aime|Te quiero|Ich liebe dich|Ti amo|Eu te amo|Ik hou van je|Jag älskar dig|Jeg elsker deg|Jeg elsker dig|Ég elska þig|Minä rakastan sinua|Szeretlek|Miluji tě|Ľúbim ťa|Kocham cię|Te iubesc|Volim te|Обичам те|Я тебя люблю|Я тебе кохаю|Я цябе кахаю|Mīlu tevi|Aš tave myliu|Armastan sind|Αγαπώ σε|Seni seviyorum|Mahal kita|Aku cinta kamu|Saya cintakan awak|Tôi yêu bạn|ฉันรักเธอ|我爱你|我愛你|我好鍾意你|愛してる|사랑해|Të dua|Maite zaitut|T’estimo|Quérote|Rwy’n dy garu di|Tá grá agam duit|Tha gaol agam ort|Karout a ran ac’h|Inħobbok|Te amo|Mi amas vin|Ech hunn dech gär|Ek is lief vir jou|Ngiyakuthanda|Ndiyakuthanda|Nakupenda|Ndinokuda|Mo nifẹ rẹ|Ina son ki|እወድሃለሁ|Waan ku jeclahay|Tiako ianao|Kea u rata|אני אוהב אותך|أحبك|دوستت دارم|مجھے تم سے محبت ہے|मैं तुमसे प्यार करता हूँ|আমি তোমাকে ভালোবাসি|நான் உன்னை காதலிக்கிறேன்|నేను నిన్ను ప్రేమిస్తున్నాను|ഞാൻ നിന്നെ സ്നേഹിക്കുന്നു|ನಾನು ನಿನ್ನನ್ನು ಪ್ರೀತಿಸುತ್ತೇನೆ|मी तुझ्यावर प्रेम करतो|હું તને પ્રેમ કરું છું|ਮੈਂ ਤੈਨੂੰ ਪਿਆਰ ਕਰਦਾ ਹਾਂ|म तिमीलाई माया गर्छु|මම ඔබට ආදරෙයි|ချစ်တယ်|ខ្ញុំស្រលាញ់អ្នក|ຂ້ອຍຮັກເຈົ້າ|Би чамд хайртай|Мен сені сүйемін|Seni sevaman|Səni sevirəm|მიყვარხარ|Ես քեզ սիրում եմ|Aloha au iā ʻoe|Aroha au ki a koe|Ou te alofa ia te oe|Au domoni iko|Aku tresna sampeyan|Abdi bogoh ka anjeun|Gihigugma tika|Ez te hez dikim|زه تا سره مینه کوم|Те сакам|Ljubim te|Eg elski teg|Ik hâld fan dy|איך האב דיך ליב|Ti tengu caru|Ti vogghiu beni|T’aimi|Jau t’am|Mwen renmen w|Mi stima bo|Munakuyki|Rohayhu|Nalingi yo|Dama la bëgg|Ndagukunda|Ndimakukonda|Ke a go rata").split("|");
+const cv=document.getElementById("c"),g=cv.getContext("2d");
+let items=[],t0=0;const DUR=15000;
+function shuf(a){a=a.slice(1);for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return[P[0],...a]}
+let FS=10;
+function build(){
+  const d=devicePixelRatio||1,W=innerWidth,H=innerHeight;
+  cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);
+  const s=Math.min(W*0.92/32,H*0.82/29),cx=W/2,cy=H/2-2.5*s,fs=FS=Math.max(6,s*0.55);
+  g.font=fs+"px system-ui,'Noto Sans',sans-serif";
+  const N=720,poly=[];
+  for(let i=0;i<N;i++){const t=i/N*6.2832;poly.push([cx+16*Math.pow(Math.sin(t),3)*s,cy-(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t))*s]);}
+  // Round the bottom cusp with a short quadratic Bezier fillet.
+  const tip=poly.reduce((best,p,i)=>p[1]>poly[best][1]?i:best,0),cut=46,rounded=[];
+  const start=(tip-cut+N)%N,end=(tip+cut)%N,a=poly[start],c=poly[tip],b=poly[end];
+  for(let i=0;i<N;i++){
+    if(i===start){rounded.push(a);for(let k=1;k<=24;k++){const u=k/24,v=1-u;rounded.push([v*v*a[0]+2*v*u*c[0]+u*u*b[0],v*v*a[1]+2*v*u*c[1]+u*u*b[1]]);}i=end;}
+    else rounded.push(poly[i]);
+  }
+  poly.length=0;poly.push(...rounded);
+  const roundY=cy+12.8*s,roundR=2.0*s,roundBottom=roundY+1.55*s;
+  const inside=(x,y)=>{if(y>=roundY)return y<=roundBottom&&(x-cx)*(x-cx)+(y-roundY)*(y-roundY)<=roundR*roundR;let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c};
+  const dist=(x,y)=>{let m=1e12;for(const p of poly){const q=(p[0]-x)**2+(p[1]-y)**2;if(q<m)m=q}return Math.sqrt(m)};
+  let q=shuf(P),qi=0;const next=()=>{if(qi>=q.length){q=shuf(P);qi=0}return q[qi++]};
+  const pitch=fs*1.35;items=[];
+  for(let y=cy-12*s+pitch*0.6;y<cy+17*s;y+=pitch){
+    const segs=[];let st=null;
+    for(let x=0;x<=W;x++){const n=inside(x,y);if(n&&st===null)st=x;if(!n&&st!==null){segs.push([st,x]);st=null}}
+    for(const [a0,b0] of segs){
+      const a=a0+fs*0.4,L=b0-a0-fs*0.8;if(L<fs*3)continue;
+      const row=[];let tot=0;
+      for(let k=0;k<14;k++){const w=next(),ww=g.measureText(w).width;
+        if(tot+ww+row.length*fs*0.6<=L){row.push([w,ww]);tot+=ww}else if(row.length&&tot>L*0.8)break}
+      if(!row.length)continue;
+      const gap=row.length>1?Math.min((L-tot)/(row.length-1),fs*1.5):0;
+      let x=a+(L-tot-gap*(row.length-1))/2;
+      for(const [w,ww] of row){items.push({t:w,x:x+ww/2,y,a:0.92+Math.random()*0.08,phase:Math.random()*Math.PI*2,ampX:0.8+Math.random()*1.2,ampY:0.7+Math.random()*1.0,speed:0.001+Math.random()*0.0005});x+=ww+gap}
+    }
+  }
+  items.forEach(it=>it.k=dist(it.x,it.y));
+  items.sort((u,v)=>u.k-v.k);
+  items.forEach((it,i)=>it.d=i/items.length*(DUR-700));
+  t0=performance.now();
+}
+function frame(now){
+  const e=now-t0;
+  g.fillStyle="#000";g.fillRect(0,0,innerWidth,innerHeight);
+  g.textAlign="center";g.textBaseline="middle";
+  g.font=FS+"px system-ui,'Noto Sans',sans-serif";
+  for(const it of items){
+    const f=Math.min(1,(e-it.d)/600);if(f<=0)continue;
+    // Independent, restrained drift keeps phrases inside the heart while making them feel alive.
+    const dx=Math.sin(e*it.speed+it.phase)*it.ampX;
+    const dy=Math.cos(e*it.speed*0.83+it.phase*1.37)*it.ampY;
+    const px=it.x+dx,py=it.y+dy;
+    // Layered neon bloom with a bright pink-white text core.
+    g.save();g.globalCompositeOperation="lighter";
+    g.shadowColor="#ff174f";g.shadowBlur=Math.max(30,FS*3.2);
+    g.fillStyle="rgba(255,18,78,"+(f*it.a*0.52)+")";g.fillText(it.t,px,py);
+    g.shadowColor="#ff3b83";g.shadowBlur=Math.max(12,FS*1.25);
+    g.fillStyle="rgba(255,55,116,"+(f*it.a*0.76)+")";g.fillText(it.t,px,py);
+    g.restore();
+    g.fillStyle="rgba(255,222,234,"+(f*it.a)+")";g.fillText(it.t,px,py);
+  }
+  g.shadowBlur=0;
+  requestAnimationFrame(frame);
+}
+addEventListener("resize",build);
+cv.addEventListener("pointerdown",build);
+build();requestAnimationFrame(frame);
+</script>
+</body>
+</html>
