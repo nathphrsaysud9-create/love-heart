@@ -68,14 +68,13 @@ function frame(now){
     const dx=Math.sin(e*it.speed+it.phase)*it.ampX;
     const dy=Math.cos(e*it.speed*0.83+it.phase*1.37)*it.ampY;
     const px=it.x+dx,py=it.y+dy;
-    // Layered neon bloom with a bright pink-white text core.
+    // Warm coral-red glow restored to match the original reference video.
     g.save();g.globalCompositeOperation="lighter";
-    g.shadowColor="#ff174f";g.shadowBlur=Math.max(30,FS*3.2);
-    g.fillStyle="rgba(255,18,78,"+(f*it.a*0.52)+")";g.fillText(it.t,px,py);
-    g.shadowColor="#ff3b83";g.shadowBlur=Math.max(12,FS*1.25);
-    g.fillStyle="rgba(255,55,116,"+(f*it.a*0.76)+")";g.fillText(it.t,px,py);
+    g.shadowColor="#ff382f";g.shadowBlur=Math.max(22,FS*2.5);
+    g.fillStyle="rgba(255,54,44,"+(f*it.a*0.56)+")";g.fillText(it.t,px,py);
     g.restore();
-    g.fillStyle="rgba(255,222,234,"+(f*it.a)+")";g.fillText(it.t,px,py);
+    g.shadowBlur=0;
+    g.fillStyle="rgba(255,84,76,"+(f*it.a)+")";g.fillText(it.t,px,py);
   }
   g.shadowBlur=0;
   requestAnimationFrame(frame);
