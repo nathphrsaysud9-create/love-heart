@@ -13,13 +13,14 @@ canvas{display:block;width:100%;height:100%}
 <body>
 <canvas id="c"></canvas>
 <script>
-const P=("I love you|Je t’aime|Te quiero|Ich liebe dich|Ti amo|Eu te amo|Ik hou van je|Jag älskar dig|Jeg elsker deg|Jeg elsker dig|Ég elska þig|Minä rakastan sinua|Szeretlek|Miluji tě|Ľúbim ťa|Kocham cię|Te iubesc|Volim te|Обичам те|Я тебя люблю|Я тебе кохаю|Я цябе кахаю|Mīlu tevi|Aš tave myliu|Armastan sind|Αγαπώ σε|Seni seviyorum|Mahal kita|Aku cinta kamu|Saya cintakan awak|Tôi yêu bạn|ฉันรักเธอ|我爱你|我愛你|我好鍾意你|愛してる|사랑해|Të dua|Maite zaitut|T’estimo|Quérote|Rwy’n dy garu di|Tá grá agam duit|Tha gaol agam ort|Karout a ran ac’h|Inħobbok|Te amo|Mi amas vin|Ech hunn dech gär|Ek is lief vir jou|Ngiyakuthanda|Ndiyakuthanda|Nakupenda|Ndinokuda|Mo nifẹ rẹ|Ina son ki|እወድሃለሁ|Waan ku jeclahay|Tiako ianao|Kea u rata|אני אוהב אותך|أحبك|دوستت دارم|مجھے تم سے محبت ہے|मैं तुमसे प्यार करता हूँ|আমি তোমাকে ভালোবাসি|நான் உன்னை காதலிக்கிறேன்|నేను నిన్ను ప్రేమిస్తున్నాను|ഞാൻ നിന്നെ സ്നേഹിക്കുന്നു|ನಾನು ನಿನ್ನನ್ನು ಪ್ರೀತಿಸುತ್ತೇನೆ|मी तुझ्यावर प्रेम करतो|હું તને પ્રેમ કરું છું|ਮੈਂ ਤੈਨੂੰ ਪਿਆਰ ਕਰਦਾ ਹਾਂ|म तिमीलाई माया गर्छु|මම ඔබට ආදරෙයි|ချစ်တယ်|ខ្ញុំស្រលាញ់អ្នក|ຂ້ອຍຮັກເຈົ້າ|Би чамд хайртай|Мен сені сүйемін|Seni sevaman|Səni sevirəm|მიყვარხარ|Ես քեզ սիրում եմ|Aloha au iā ʻoe|Aroha au ki a koe|Ou te alofa ia te oe|Au domoni iko|Aku tresna sampeyan|Abdi bogoh ka anjeun|Gihigugma tika|Ez te hez dikim|زه تا سره مینه کوم|Те сакам|Ljubim te|Eg elski teg|Ik hâld fan dy|איך האב דיך ליב|Ti tengu caru|Ti vogghiu beni|T’aimi|Jau t’am|Mwen renmen w|Mi stima bo|Munakuyki|Rohayhu|Nalingi yo|Dama la bëgg|Ndagukunda|Ndimakukonda|Ke a go rata").split("|");
+const P=["I love you", "Je t'aime", "Te amo", "Ich liebe dich", "Ti amo", "Eu te amo", "Ik hou van jou", "Jag älskar dig", "Я тебя люблю", "Σ' αγαπώ", "Aku cinta kamu", "Anh yêu em", "ฉันรักเธอ", "我爱你", "愛してる", "사랑해", "Seni seviyorum", "Kocham cię", "मैं तुमसे प्यार करता हूँ"];
 const cv=document.getElementById("c"),g=cv.getContext("2d");
-let items=[],t0=0;const DUR=15000;
+let items=[],t0=0,sprites=new Map(),dpr=1,lastFrame=0;const DUR=15000,FPS_INTERVAL=1000/30;
 function shuf(a){a=a.slice(1);for(let i=a.length-1;i>0;i--){const j=Math.random()*(i+1)|0;[a[i],a[j]]=[a[j],a[i]]}return[P[0],...a]}
 let FS=10;
 function build(){
-  const d=devicePixelRatio||1,W=innerWidth,H=innerHeight;
+  const d=dpr=Math.min(devicePixelRatio||1,2),W=innerWidth,H=innerHeight;
+  sprites=new Map();lastFrame=0;
   cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0);
   const s=Math.min(W*0.92/32,H*0.82/29),cx=W/2,cy=H/2-2.5*s,fs=FS=Math.max(6,s*0.55);
   g.font=fs+"px system-ui,'Noto Sans',sans-serif";
@@ -35,7 +36,6 @@ function build(){
   poly.length=0;poly.push(...rounded);
   const roundY=cy+12.8*s,roundR=2.0*s,roundBottom=roundY+1.55*s;
   const inside=(x,y)=>{if(y>=roundY)return y<=roundBottom&&(x-cx)*(x-cx)+(y-roundY)*(y-roundY)<=roundR*roundR;let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const a=poly[i],b=poly[j];if((a[1]>y)!==(b[1]>y)&&x<(b[0]-a[0])*(y-a[1])/(b[1]-a[1])+a[0])c=!c}return c};
-  const dist=(x,y)=>{let m=1e12;for(const p of poly){const q=(p[0]-x)**2+(p[1]-y)**2;if(q<m)m=q}return Math.sqrt(m)};
   let q=shuf(P),qi=0;const next=()=>{if(qi>=q.length){q=shuf(P);qi=0}return q[qi++]};
   const pitch=fs*1.35;items=[];
   for(let y=cy-12*s+pitch*0.6;y<cy+17*s;y+=pitch){
@@ -52,31 +52,45 @@ function build(){
       for(const [w,ww] of row){items.push({t:w,x:x+ww/2,y,a:0.92+Math.random()*0.08,phase:Math.random()*Math.PI*2,ampX:0.8+Math.random()*1.2,ampY:0.7+Math.random()*1.0,speed:0.001+Math.random()*0.0005});x+=ww+gap}
     }
   }
-  items.forEach(it=>it.k=dist(it.x,it.y));
+  // Cheap center-to-edge ordering avoids scanning every boundary vertex for every phrase.
+  items.forEach(it=>it.k=Math.hypot((it.x-cx)/(16*s),(it.y-cy)/(19*s)));
   items.sort((u,v)=>u.k-v.k);
   items.forEach((it,i)=>it.d=i/items.length*(DUR-700));
+  // Rasterize each unique phrase once; animation frames only draw cached sprites.
+  for(const text of new Set(items.map(it=>it.t))) spriteFor(text);
   t0=performance.now();
 }
+function spriteFor(text){
+  if(sprites.has(text))return sprites.get(text);
+  const blur=Math.max(14,FS*1.8),glowBlur=blur*2.2,pad=Math.ceil(glowBlur*2.4+4);
+  g.font=FS+"px system-ui,'Noto Sans',sans-serif";
+  const w=Math.ceil(g.measureText(text).width+pad*2),h=Math.ceil(FS*2.2+pad*2);
+  const canvas=document.createElement("canvas");canvas.width=Math.ceil(w*dpr);canvas.height=Math.ceil(h*dpr);
+  const c=canvas.getContext("2d");c.setTransform(dpr,0,0,dpr,0,0);
+  c.font=FS+"px system-ui,'Noto Sans',sans-serif";c.textAlign="center";c.textBaseline="middle";
+  // Glow and crisp core use the original coral-red code color.
+  c.globalCompositeOperation="lighter";c.shadowColor="rgba(255,84,76,0.98)";c.shadowBlur=glowBlur;
+  c.fillStyle="rgba(255,84,76,0.92)";c.fillText(text,w/2,h/2);
+  c.shadowBlur=blur*1.1;c.fillStyle="rgba(255,84,76,0.82)";c.fillText(text,w/2,h/2);
+  c.globalCompositeOperation="source-over";c.shadowBlur=0;c.fillStyle="#ff544c";c.fillText(text,w/2,h/2);
+  const sprite={canvas,w,h};sprites.set(text,sprite);return sprite;
+}
 function frame(now){
+  if(now-lastFrame<FPS_INTERVAL){requestAnimationFrame(frame);return;}
+  lastFrame=now;
   const e=now-t0;
   g.fillStyle="#000";g.fillRect(0,0,innerWidth,innerHeight);
-  g.textAlign="center";g.textBaseline="middle";
-  g.font=FS+"px system-ui,'Noto Sans',sans-serif";
   for(const it of items){
     const f=Math.min(1,(e-it.d)/600);if(f<=0)continue;
-    // Independent, restrained drift keeps phrases inside the heart while making them feel alive.
     const dx=Math.sin(e*it.speed+it.phase)*it.ampX;
     const dy=Math.cos(e*it.speed*0.83+it.phase*1.37)*it.ampY;
-    const px=it.x+dx,py=it.y+dy;
-    // Warm coral-red glow restored to match the original reference video.
-    g.save();g.globalCompositeOperation="lighter";
-    g.shadowColor="#ff382f";g.shadowBlur=Math.max(22,FS*2.5);
-    g.fillStyle="rgba(255,54,44,"+(f*it.a*0.56)+")";g.fillText(it.t,px,py);
-    g.restore();
-    g.shadowBlur=0;
-    g.fillStyle="rgba(255,84,76,"+(f*it.a)+")";g.fillText(it.t,px,py);
+    const px=it.x+dx,py=it.y+dy,sprite=sprites.get(it.t);
+    // Each phrase gently pulses between nearby brightness levels of the same coral-red.
+    const shade=0.84+0.16*(0.5+0.5*Math.sin(e*0.0014+it.phase));
+    g.globalAlpha=f*it.a*shade;
+    g.drawImage(sprite.canvas,px-sprite.w/2,py-sprite.h/2,sprite.w,sprite.h);
   }
-  g.shadowBlur=0;
+  g.globalAlpha=1;
   requestAnimationFrame(frame);
 }
 addEventListener("resize",build);
